@@ -14,9 +14,6 @@ python planar_graph_generator.py --n-vertices 10 --seed 42
 # Generate weighted graph using Boltzmann method
 python planar_graph_generator.py --n-vertices 15 --method boltzmann --weighted
 
-# Compare both generation methods with benchmarking
-python compare_methods.py --test-size 20 --num-trials 5
-
 # Generate multiple graphs for analysis
 python planar_graph_generator.py --n-vertices 25 --num-graphs 5 --seed 123
 ```
