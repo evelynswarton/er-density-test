@@ -28,8 +28,6 @@ This codebase provides:
   - Delaunay triangulation (default, always available)
   - Boltzmann sampling (uniform random planar graphs)
 - **Effective resistance computation** for all vertex pairs
-- **Comparative analysis** between generation methods
-- **Benchmarking tools** for performance and statistical properties
 
 ## Installation
 
@@ -69,22 +67,6 @@ python planar_graph_generator.py --n-vertices 10 --num-graphs 5 --seed 42
 python planar_graph_generator.py --n-vertices 10 --output-dir my_results
 ```
 
-### Compare Generation Methods
-
-```bash
-# Full comparison with benchmarking
-python compare_methods.py
-
-# Custom comparison parameters
-python compare_methods.py --test-size 25 --num-trials 10 --weighted
-
-# Skip benchmarking, detailed comparison only
-python compare_methods.py --skip-benchmark --test-size 15
-
-# Custom benchmark sizes
-python compare_methods.py --benchmark-sizes 10 20 40 80 --num-trials 3
-```
-
 ### Key Parameters
 
 | Parameter | Description | Default |
@@ -108,7 +90,6 @@ Generated files are saved in the specified output directory (default: `results/`
   - Graph metadata
 
 - `graph_n{N}_m{M}_{weighted/unweighted}_id{ID}.npz` - Compressed adjacency matrix
-- Comparison results in `comparison_results/` with benchmark statistics
 
 ### YAML Structure
 
@@ -180,5 +161,6 @@ python -c "import networkx, numpy, scipy, yaml; print('All dependencies OK')"
 
 ## References
 
+Inherited from boltzmann sampling submodule
 - Fusy, É. (2005). "Quadratic exact-size and linear approximate-size random generation of planar graphs."
 - Fusy, É. (2009). "Uniform random sampling of planar graphs in linear time." Random Structures & Algorithms 35.4: 464-522.
