@@ -35,8 +35,8 @@ This codebase provides:
 
 ```bash
 # Clone repository
-git clone <repository-url>
-cd some-random-code
+git clone github.com/evelynswarton/er-density-test
+cd er-density-test
 
 # Create virtual environment (recommended)
 python -m venv venv
