@@ -172,13 +172,10 @@ python -c "import networkx, numpy, scipy, yaml; print('All dependencies OK')"
 ## File Structure
 
 ```
-├── planar_graph_generator.py     # Main generation script
-├── compare_methods.py           # Method comparison and benchmarking
+├── planar_graph_generator.py    # Main generation script
 ├── requirements.txt             # Python dependencies
 ├── boltzmann-planar-graph/      # Boltzmann sampler implementation
-├── results/                     # Generated graphs and analysis
-├── test_yaml_basic.ipynb       # Basic testing notebook
-└── test_yaml_performance.ipynb # Performance testing notebook
+└── results/                     # Generated graphs and analysis
 ```
 
 ## References
