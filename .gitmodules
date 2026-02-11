@@ -1,0 +1,3 @@
+[submodule "boltzmann-planar-graph"]
+	path = boltzmann-planar-graph
+	url = https://github.com/towink/boltzmann-planar-graph

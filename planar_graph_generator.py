@@ -159,6 +159,7 @@ def _generate_planar_graph_boltzmann(
     random.seed(seed)
     np.random.seed(seed)
 
+
     try:
         # Create Boltzmann generator
         generator = PlanarGraphGenerator(

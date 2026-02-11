@@ -2,22 +2,22 @@
 
 A research codebase for generating planar graphs and computing effective resistance distances between all vertex pairs. Implements both Delaunay triangulation and Boltzmann sampling methods for comparative analysis.
 
-## Quick Start
+## Quick Start / 快速开始
 
 ```bash
-# Install dependencies
+# Install dependencies / 安装依赖
 pip install -r requirements.txt
 
-# Generate a single planar graph with effective resistance (default: Delaunay)
+# Generate a single planar graph with effective resistance (default: Delaunay) / 生成单个平面图及其有效电阻（默认：德劳内三角剖分）
 python planar_graph_generator.py --n-vertices 10 --seed 42
 
-# Generate weighted graph using Boltzmann method
+# Generate weighted graph using Boltzmann method / 使用玻尔兹曼方法生成加权图
 python planar_graph_generator.py --n-vertices 15 --method boltzmann --weighted
 
-# Compare both generation methods with benchmarking
+# Compare both generation methods with benchmarking / 比较两种生成方法并进行基准测试
 python compare_methods.py --test-size 20 --num-trials 5
 
-# Generate multiple graphs for analysis
+# Generate multiple graphs for analysis / 生成多个图进行分析
 python planar_graph_generator.py --n-vertices 25 --num-graphs 5 --seed 123
 ```
 
@@ -31,24 +31,24 @@ This codebase provides:
 - **Comparative analysis** between generation methods
 - **Benchmarking tools** for performance and statistical properties
 
-## Installation
+## Installation / 安装指南
 
 ```bash
-# Clone repository
+# Clone repository / 克隆仓库
 git clone github.com/evelynswarton/er-density-test
 cd er-density-test
 
-# Create virtual environment (recommended)
+# Create virtual environment (recommended) / 创建虚拟环境（推荐）
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate / Windows系统请使用：venv\Scripts\activate
 
-# Install dependencies
+# Install dependencies / 安装依赖
 pip install -r requirements.txt
 ```
 
-**Note**: The Boltzmann sampler is optional. If unavailable, the code automatically falls back to Delaunay triangulation.
+**Note / 注意**: The Boltzmann sampler is optional. If unavailable, the code automatically falls back to Delaunay triangulation. / 玻尔兹曼采样器是可选的。如果不可用，代码将自动回退到德劳内三角剖分。
 
-## Usage
+## Usage / 使用方法
 
 ### Generate Planar Graphs
 
