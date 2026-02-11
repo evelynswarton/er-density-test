@@ -14,10 +14,7 @@ python planar_graph_generator.py --n-vertices 10 --seed 42
 # Generate weighted graph using Boltzmann method / 使用玻尔兹曼方法生成加权图
 python planar_graph_generator.py --n-vertices 15 --method boltzmann --weighted
 
-# Compare both generation methods with benchmarking / 比较两种生成方法并进行基准测试
-python compare_methods.py --test-size 20 --num-trials 5
-
-# Generate multiple graphs for analysis / 生成多个图进行分析
+# Generate multiple graphs for analysis
 python planar_graph_generator.py --n-vertices 25 --num-graphs 5 --seed 123
 ```
 
@@ -28,8 +25,6 @@ This codebase provides:
   - Delaunay triangulation (default, always available)
   - Boltzmann sampling (uniform random planar graphs)
 - **Effective resistance computation** for all vertex pairs
-- **Comparative analysis** between generation methods
-- **Benchmarking tools** for performance and statistical properties
 
 ## Installation / 安装指南
 
@@ -69,22 +64,6 @@ python planar_graph_generator.py --n-vertices 10 --num-graphs 5 --seed 42
 python planar_graph_generator.py --n-vertices 10 --output-dir my_results
 ```
 
-### Compare Generation Methods
-
-```bash
-# Full comparison with benchmarking
-python compare_methods.py
-
-# Custom comparison parameters
-python compare_methods.py --test-size 25 --num-trials 10 --weighted
-
-# Skip benchmarking, detailed comparison only
-python compare_methods.py --skip-benchmark --test-size 15
-
-# Custom benchmark sizes
-python compare_methods.py --benchmark-sizes 10 20 40 80 --num-trials 3
-```
-
 ### Key Parameters
 
 | Parameter | Description | Default |
@@ -108,7 +87,6 @@ Generated files are saved in the specified output directory (default: `results/`
   - Graph metadata
 
 - `graph_n{N}_m{M}_{weighted/unweighted}_id{ID}.npz` - Compressed adjacency matrix
-- Comparison results in `comparison_results/` with benchmark statistics
 
 ### YAML Structure
 
@@ -172,16 +150,14 @@ python -c "import networkx, numpy, scipy, yaml; print('All dependencies OK')"
 ## File Structure
 
 ```
-├── planar_graph_generator.py     # Main generation script
-├── compare_methods.py           # Method comparison and benchmarking
+├── planar_graph_generator.py    # Main generation script
 ├── requirements.txt             # Python dependencies
 ├── boltzmann-planar-graph/      # Boltzmann sampler implementation
-├── results/                     # Generated graphs and analysis
-├── test_yaml_basic.ipynb       # Basic testing notebook
-└── test_yaml_performance.ipynb # Performance testing notebook
+└── results/                     # Generated graphs and analysis
 ```
 
 ## References
 
+Inherited from boltzmann sampling submodule
 - Fusy, É. (2005). "Quadratic exact-size and linear approximate-size random generation of planar graphs."
 - Fusy, É. (2009). "Uniform random sampling of planar graphs in linear time." Random Structures & Algorithms 35.4: 464-522.
