@@ -1,5 +1,5 @@
-numpy>=1.21.0
-networkx>=2.6.0
-scipy>=1.7.0
-pyyaml>=6.0
-jupyter>=1.0.0
+numpy>=1.21.0            # Numerical computing / 数值计算 / 数値計算
+networkx>=2.6.0           # Graph theory / 图论 / グラフ理論
+scipy>=1.7.0              # Scientific computing / 科学计算 / 科学技術計算
+pyyaml>=6.0               # YAML parsing / YAML解析 / YAML解析
+jupyter>=1.0.0             # Interactive notebooks / 交互式笔记本 / インタラクティブノートブック

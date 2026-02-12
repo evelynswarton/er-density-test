@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """
 Planar Graph Generator and Effective Resistance Calculator
+平面图生成器与有效电阻计算器
 
 This module generates planar graphs and computes the multiset of pairwise
 effective resistance distances between all vertices.
+本模块生成平面图并计算所有顶点对之间的有效电阻距离的多重集。
+
+平面グラフを生成し、すべての頂点ペア間の有効抵抗距離のマルチセットを計算します。
 """
 
 import numpy as np
@@ -17,9 +21,11 @@ from datetime import datetime
 import sys
 import os
 
-# Try to import Boltzmann sampler
+# Try to import Boltzmann sampler / 尝试导入玻尔兹曼采样器 / ボルツマンサンプラーをインポートしようとする
 try:
     # Add the boltzmann-planar-graph directory to Python path if needed
+    # 如果需要，将boltzmann-planar-graph目录添加到Python路径
+    # 必要に応じて、boltzmann-planar-graphディレクトリをPythonパスに追加
     boltzmann_path = Path(__file__).parent / "boltzmann-planar-graph"
     if boltzmann_path.exists():
         sys.path.insert(0, str(boltzmann_path))
@@ -44,34 +50,41 @@ def generate_planar_graph(
 ) -> nx.Graph:
     """
     Generate a random planar graph with specified number of vertices.
+    生成具有指定顶点数的随机平面图。
+    指定された頂点数でランダムな平面グラフを生成します。
 
     Args:
-        n_vertices: Number of vertices in the graph
-        seed: Random seed for reproducibility
-        weighted: Whether to assign random weights to edges
-        method: Generation method ("delaunay" or "boltzmann")
-        epsilon: Size tolerance for Boltzmann sampler (0=exact, >0=approximate)
-        require_connected: Whether to require connectivity (Boltzmann only)
-        with_embedding: Whether to return planar embedding (Boltzmann only)
-        allow_multiproc: Whether to allow parallel processing (Boltzmann only)
+        n_vertices: Number of vertices in the graph / 图中顶点数 / グラフの頂点数
+        seed: Random seed for reproducibility / 可重现性的随机种子 / 再現性のための乱数シード
+        weighted: Whether to assign random weights to edges / 是否为边分配随机权重 / 辺にランダムな重みを割り当てるかどうか
+        method: Generation method ("delaunay" or "boltzmann") / 生成方法（"delaunay"或"boltzmann"）/ 生成方法（"delaunay"または"boltzmann"）
+        epsilon: Size tolerance for Boltzmann sampler (0=exact, >0=approximate) / 玻尔兹曼采样器的大小容差 / ボルツマンサンプラーのサイズ許容範囲
+        require_connected: Whether to require connectivity (Boltzmann only) / 是否要求连通性（仅玻尔兹曼） / 接続性を要求するかどうか（ボルツマンのみ）
+        with_embedding: Whether to return planar embedding (Boltzmann only) / 是否返回平面嵌入（仅玻尔兹曼） / 平面埋め込みを返すかどうか（ボルツマンのみ）
+        allow_multiproc: Whether to allow parallel processing (Boltzmann only) / 是否允许并行处理（仅玻尔兹曼） / 並列処理を許可するかどうか（ボルツマンのみ）
 
     Returns:
         NetworkX Graph object representing a planar graph
+        表示平面图的NetworkX图对象
+        平面グラフを表すNetworkX Graphオブジェクト
 
     Methods:
         - "delaunay": Uses Delaunay triangulation (default, maintains backward compatibility)
         - "boltzmann": Uses Boltzmann sampler for uniform random planar graphs
+    生成方法：
+        - "delaunay": 使用德劳内三角剖分（默认，保持向后兼容）
+        - "boltzmann": 使用玻尔兹曼采样器生成均匀随机平面图
 
-    Boltzmann advantages:
-        - Uniform random sampling from all planar graphs
-        - Better size control for large graphs
-        - Exact connectedness guarantee
-        - Theoretical soundness
+    Boltzmann advantages / 玻尔兹曼优势 / ボルツマンの利点:
+        - Uniform random sampling from all planar graphs / 从所有平面图均匀随机采样 / すべての平面グラフから一様ランダムサンプリング
+        - Better size control for large graphs / 对大图更好的大小控制 / 大きなグラフのサイズ制御がより良い
+        - Exact connectedness guarantee / 精确的连通性保证 / 正確な接続性の保証
+        - Theoretical soundness / 理论上的正确性 / 理論的な健全性
 
-    Delaunay advantages:
-        - Faster for small graphs (< 100 nodes)
-        - Deterministic with same seed
-        - No additional dependencies
+    Delaunay advantages / 德劳内优势 / ドロネーの利点:
+        - Faster for small graphs (< 100 nodes) / 对小图更快（<100节点） / 小さなグラフ（<100ノード）でより高速
+        - Deterministic with same seed / 相同种子的确定性 / 同じシードで決定論的
+        - No additional dependencies / 无额外依赖 / 追加の依存関係なし
     """
     if method == "delaunay":
         return _generate_planar_graph_delaunay(n_vertices, seed, weighted)
@@ -92,29 +105,43 @@ def generate_planar_graph(
 def _generate_planar_graph_delaunay(
     n_vertices: int, seed: int, weighted: bool = False
 ) -> nx.Graph:
-    """Generate planar graph using Delaunay triangulation method."""
+    """Generate planar graph using Delaunay triangulation method.
+    使用德劳内三角剖分方法生成平面图。
+    ドロネー三角分割法を使用して平面グラフを生成します。"""
     rng = np.random.default_rng(seed)
 
     # Generate a random planar graph using Delaunay triangulation approach
+    # 使用德劳内三角剖分方法生成随机平面图
+    # ドロネー三角分割アプローチを使用してランダムな平面グラフを生成
     # Create random points in 2D and compute Delaunay triangulation
+    # 在2D中创建随机点并计算德劳内三角剖分
+    # 2Dでランダムな点を作成し、ドロネー三角分割を計算
     points = rng.random((n_vertices, 2))
 
     # Create Delaunay triangulation (guaranteed planar)
+    # 创建德劳内三角剖分（保证平面性）
+    # ドロネー三角分割を作成（平面性が保証）
     from scipy.spatial import Delaunay
 
     tri = Delaunay(points)
 
     # Build graph from triangulation
+    # 从三角剖分构建图
+    # 三角分割からグラフを構築
     G = nx.Graph()
     G.add_nodes_from(range(n_vertices))
 
     # Add edges from triangulation
+    # 从三角剖分添加边
+    # 三角分割から辺を追加
     for simplex in tri.simplices:
         for i in range(3):
             for j in range(i + 1, 3):
                 G.add_edge(simplex[i], simplex[j])
 
     # Randomly remove edges while maintaining connectivity
+    # 随机移除边同时保持连通性
+    # 接続性を維持しながらランダムに辺を削除
     edges = list(G.edges())
     rng.shuffle(edges)
 
@@ -125,6 +152,8 @@ def _generate_planar_graph_delaunay(
                 G.add_edge(*edge)
 
     # Add weights if requested
+    # 如果请求则添加权重
+    # 要求された場合は重みを追加
     if weighted:
         G = add_edge_weights(G, seed)
 
@@ -140,7 +169,9 @@ def _generate_planar_graph_boltzmann(
     with_embedding: bool = False,
     allow_multiproc: bool = False,
 ) -> nx.Graph:
-    """Generate planar graph using Boltzmann sampler method."""
+    """Generate planar graph using Boltzmann sampler method.
+    使用玻尔兹曼采样器方法生成平面图。
+    ボルツマンサンプラー法を使用して平面グラフを生成します。"""
     if not BOLTZMANN_AVAILABLE:
         raise RuntimeError(
             f"Boltzmann sampler not available. Install with: pip install -e boltzmann-planar-graph\n"
@@ -158,7 +189,6 @@ def _generate_planar_graph_boltzmann(
 
     random.seed(seed)
     np.random.seed(seed)
-
 
     try:
         # Create Boltzmann generator
@@ -205,13 +235,17 @@ def _generate_planar_graph_boltzmann(
 def add_edge_weights(G: nx.Graph, seed: int) -> nx.Graph:
     """
     Add random weights to edges of a graph.
+    为图的边添加随机权重。
+    グラフの辺にランダムな重みを追加します。
 
     Args:
-        G: NetworkX Graph object
-        seed: Random seed for reproducibility
+        G: NetworkX Graph object / NetworkX图对象 / NetworkX Graphオブジェクト
+        seed: Random seed for reproducibility / 可重现性的随机种子 / 再現性のための乱数シード
 
     Returns:
         NetworkX Graph object with weighted edges
+        带有权重边的NetworkX图对象
+        重み付き辺を持つNetworkX Graphオブジェクト
     """
     rng = np.random.default_rng(seed)
 
@@ -239,15 +273,21 @@ def adjacency_matrix_to_numpy(G: nx.Graph) -> np.ndarray:
 def compute_effective_resistance(G: nx.Graph) -> np.ndarray:
     """
     Compute effective resistance distances between all pairs of vertices.
+    计算所有顶点对之间的有效电阻距离。
+    すべての頂点ペア間の有効抵抗距離を計算します。
 
     Uses the Moore-Penrose pseudoinverse of the Laplacian matrix.
+    使用拉普拉斯矩阵的摩尔-彭罗斯伪逆。
+    ラプラシアン行列のムーア・ペンローズ擬似逆行列を使用します。
     R_ij = L^+_ii + L^+_jj - 2*L^+_ij
 
     Args:
-        G: NetworkX Graph object
+        G: NetworkX Graph object / NetworkX图对象 / NetworkX Graphオブジェクト
 
     Returns:
         Symmetric matrix of effective resistance distances
+        有效电阻距离的对称矩阵
+        有効抵抗距離の対称行列
     """
     n = G.number_of_nodes()
 
@@ -289,7 +329,7 @@ def get_resistance_multiset(resistance_matrix: np.ndarray) -> List[float]:
 
     for i in range(n):
         for j in range(i + 1, n):
-            multiset.append(resistance_matrix[i, j])
+            multiset.append(float(resistance_matrix[i, j]))
 
     return multiset
 
@@ -509,7 +549,9 @@ def main() -> None:
             else None,
             "generation_method": method,
             "boltzmann_epsilon": args.epsilon if method == "boltzmann" else None,
-            "boltzmann_connected": args.require_connected if method == "boltzmann" else None,
+            "boltzmann_connected": args.require_connected
+            if method == "boltzmann"
+            else None,
         }
 
         # Modify graph_id if comparing methods
@@ -521,7 +563,13 @@ def main() -> None:
                 current_graph_id = graph_id * 2 + 1
 
         # Save results
-        save_results(adj_matrix, resistance_multiset, graph_metadata, output_dir, current_graph_id)
+        save_results(
+            adj_matrix,
+            resistance_multiset,
+            graph_metadata,
+            output_dir,
+            current_graph_id,
+        )
 
         # Print summary statistics
         print(f"  Graph edges: {G.number_of_edges()}")
