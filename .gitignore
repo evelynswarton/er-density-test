@@ -1,2 +1,3 @@
 venv                     # Virtual environment / 虚拟环境 / 仮想環境
 .DS_Store                # macOS system files / macOS系统文件 / macOSシステムファイル
+results
