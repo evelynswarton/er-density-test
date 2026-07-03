@@ -1,4 +1,4 @@
-# Planar Graph Generation and Effective Resistance Analysis
+# ER Density Testing - Heuristic Analyzer for Effective Resistance Volume Growth
 
 A research codebase for generating planar graphs and computing effective resistance distances between all vertex pairs. Implements both Delaunay triangulation and Boltzmann sampling methods for comparative analysis.
 
@@ -69,6 +69,7 @@ python planar_graph_generator.py --n-vertices 10 --num-graphs 5 --seed 42
 | `--seed` | Random seed for reproducibility | 42 |
 | `--method` | Generation method (`delaunay`/`boltzmann`) | `delaunay` |
 | `--weighted` | Generate weighted graphs | False |
+| `--max-degree` | Rejection sampling based on graph degree | Inf |
 | `--num-graphs` | Number of graphs to generate | 1 |
 | `--epsilon` | Size tolerance for Boltzmann sampler | 0.1 |
 
@@ -120,6 +121,12 @@ python -c "import networkx, numpy, scipy, yaml; print('All dependencies OK')"
 
 ```
 ├── planar_graph_generator.py    # Main generation script
+├── conversion.py                # File and matrix conversions
+├── distances.py                 # Spectral distance measures and shortest path length
+├── generate_all.py              # Batch generation script
+├── growth_test.py               # Checking the growth rates of cached graphs
+├── growth.py                    # Functions for well-defined effective resistance volume growths and the cumulative distribution function
+├── statistics.py                # Gives a LaTeX table for results
 ├── requirements.txt             # Python dependencies
 ├── boltzmann-planar-graph/      # Boltzmann sampler implementation
 └── graphs/                     # Generated graphs
