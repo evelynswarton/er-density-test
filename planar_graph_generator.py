@@ -15,6 +15,7 @@ import sys
 import os
 import hashlib
 
+
 try:
     boltzmann_path = Path(__file__).parent / "boltzmann-planar-graph"
     if boltzmann_path.exists():
@@ -32,6 +33,7 @@ def generate_planar_graph(
     n_vertices: int,
     seed: int,
     weighted: bool = False,
+    max_degree: float = float('inf'),
     method: str = "delaunay",
     epsilon: float = 0.1,
     require_connected: bool = True,
@@ -70,25 +72,29 @@ def generate_planar_graph(
         - No additional dependencies
     """
     if method == "delaunay":
-        return _generate_planar_graph_delaunay(n_vertices, seed, weighted)
+        return _generate_planar_graph_delaunay(n_vertices, seed, weighted, max_degree)
     elif method == "boltzmann":
         return _generate_planar_graph_boltzmann(
-            n_vertices,
-            seed,
-            weighted,
-            epsilon,
-            require_connected,
-            with_embedding,
-            allow_multiproc,
-        )
+                n_vertices,
+                seed,
+                weighted,
+                max_degree,
+                epsilon,
+                require_connected,
+                with_embedding,
+                allow_multiproc,
+                )
     else:
         raise ValueError(f"Unknown method: {method}. Use 'delaunay' or 'boltzmann'")
 
 
 def _generate_planar_graph_delaunay(
-    n_vertices: int, seed: int, weighted: bool = False
-) -> nx.Graph:
+        n_vertices: int, seed: int, weighted: bool = False, max_degree: float = float('inf')
+        ) -> nx.Graph:
     """Generate planar graph using Delaunay triangulation method."""
+    if max_degree != float('inf'):
+        print("Maximum degree is already bounded for Delaunay triangulations. Further restrictions will not be enforced.")
+
     rng = np.random.default_rng(seed)
 
     points = rng.random((n_vertices, 2))
@@ -99,6 +105,7 @@ def _generate_planar_graph_delaunay(
 
     G = nx.Graph()
     G.add_nodes_from(range(n_vertices))
+
 
     for simplex in tri.simplices:
         for i in range(3):
@@ -121,20 +128,21 @@ def _generate_planar_graph_delaunay(
 
 
 def _generate_planar_graph_boltzmann(
-    n_vertices: int,
-    seed: int,
-    weighted: bool = False,
-    epsilon: float = 0.1,
-    require_connected: bool = True,
-    with_embedding: bool = False,
-    allow_multiproc: bool = False,
-) -> nx.Graph:
+        n_vertices: int,
+        seed: int,
+        weighted: bool = False,
+        max_degree: float = float('inf'),
+        epsilon: float = 0.1,
+        require_connected: bool = True,
+        with_embedding: bool = False,
+        allow_multiproc: bool = False,
+        ) -> nx.Graph:
     """Generate planar graph using Boltzmann sampler method."""
     if not BOLTZMANN_AVAILABLE:
         raise RuntimeError(
-            f"Boltzmann sampler not available. Install with: pip install -e boltzmann-planar-graph\n"
-            f"Import error: {BOLTZMANN_IMPORT_ERROR}"
-        )
+                f"Boltzmann sampler not available. Install with: pip install -e boltzmann-planar-graph\n"
+                f"Import error: {BOLTZMANN_IMPORT_ERROR}"
+                )
 
     if n_vertices < 3:
         raise ValueError("Boltzmann sampler requires at least 3 vertices")
@@ -149,14 +157,18 @@ def _generate_planar_graph_boltzmann(
 
     try:
         generator = PlanarGraphGenerator(
-            n=n_vertices,
-            epsilon=epsilon,
-            require_connected=require_connected,
-            with_embedding=with_embedding,
-            allow_multiproc=allow_multiproc,
-        )
+                n=n_vertices,
+                epsilon=epsilon,
+                require_connected=require_connected,
+                with_embedding=with_embedding,
+                allow_multiproc=allow_multiproc,
+                )
 
         G = generator.sample()
+        
+        while max(d[1] for d in G.degree()) > max_degree:
+            print('Rejecting due to degree.')
+            G = generator.sample()
 
         if G.number_of_nodes() > 0:
             mapping = {node: node - 1 for node in G.nodes()}
@@ -168,12 +180,12 @@ def _generate_planar_graph_boltzmann(
 
         if require_connected and not nx.is_connected(G):
             raise RuntimeError(
-                "Generated graph is not connected - this should not happen"
-            )
+                    "Generated graph is not connected - this should not happen"
+                    )
 
         print(
-            f"Boltzmann generated: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges"
-        )
+                f"Boltzmann generated: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges"
+                )
 
     except Exception as e:
         raise RuntimeError(f"Boltzmann sampler failed: {str(e)}")
@@ -287,13 +299,13 @@ def generate_filename(n_nodes: int, m_edges: int, weighted: bool, graph_id: int)
 
 
 def save_results(
-    adjacency_matrix: np.ndarray,
-    resistance_matrix: np.ndarray,
-    resistance_multiset: List[float],
-    graph_metadata: dict,
-    output_dir: Path,
-    graph_id: Optional[int] = None,
-) -> None:
+        adjacency_matrix: np.ndarray,
+        resistance_matrix: np.ndarray,
+        resistance_multiset: List[float],
+        graph_metadata: dict,
+        output_dir: Path,
+        graph_id: Optional[int] = None,
+        ) -> None:
     """
     Save adjacency matrix, resistance matrix, and resistance multiset to JSON files.
 
@@ -357,63 +369,61 @@ def load_results(filepath: Path) -> dict:
         resistance_multiset = json.load(f)
 
     return {
-        "adjacency_matrix": adjacency_matrix,
-        "resistance_matrix": resistance_matrix,
-        "resistance_multiset": resistance_multiset,
-    }
+            "adjacency_matrix": adjacency_matrix,
+            "resistance_matrix": resistance_matrix,
+            "resistance_multiset": resistance_multiset,
+            }
 
 
 def main() -> None:
     """Main function to generate planar graphs and compute effective resistances."""
     parser = argparse.ArgumentParser(
-        description="Generate planar graphs and compute effective resistance distances"
-    )
+            description="Generate planar graphs and compute effective resistance distances"
+            )
     parser.add_argument(
-        "--n-vertices",
-        type=int,
-        default=10,
-        help="Number of vertices in the planar graph",
-    )
+            "--n-vertices",
+            type=int,
+            default=10,
+            help="Number of vertices in the planar graph",
+            )
     parser.add_argument(
-        "--seed", type=int, default=42, help="Random seed for reproducibility"
-    )
+            "--seed", type=int, default=42, help="Random seed for reproducibility"
+            )
     parser.add_argument(
-        "--output-dir", type=str, default="results", help="Directory to save results"
-    )
+            "--output-dir", type=str, default="results", help="Directory to save results"
+            )
     parser.add_argument(
-        "--num-graphs", type=int, default=1, help="Number of graphs to generate"
-    )
+            "--num-graphs", type=int, default=1, help="Number of graphs to generate"
+            )
     parser.add_argument(
-        "--weighted", action="store_true", help="Generate weighted graphs"
-    )
+            "--weighted", action="store_true", help="Generate weighted graphs"
+            )
     parser.add_argument(
-        "--method",
-        choices=["delaunay", "boltzmann"],
-        default="delaunay",
-        help="Graph generation method (default: delaunay)",
-    )
+            "--max-degree", type=float, default=float('inf'), help="Rejection sample based on degree bounds."
+            )
     parser.add_argument(
-        "--epsilon",
-        type=float,
-        default=0.1,
-        help="Size tolerance for Boltzmann sampler (0=exact, >0=approximate, default: 0.1)",
-    )
+            "--method",
+            choices=["delaunay", "boltzmann"],
+            default="delaunay",
+            help="Graph generation method (default: delaunay)",
+            )
     parser.add_argument(
-        "--require-connected",
-        action="store_true",
-        default=True,
-        help="Require connectivity for Boltzmann sampler (default: True)",
-    )
+            "--epsilon",
+            type=float,
+            default=0.1,
+            help="Size tolerance for Boltzmann sampler (0=exact, >0=approximate, default: 0.1)",
+            )
     parser.add_argument(
-        "--allow-multiproc",
-        action="store_true",
-        help="Allow parallel processing for Boltzmann sampler",
-    )
+            "--require-connected",
+            action="store_true",
+            default=True,
+            help="Require connectivity for Boltzmann sampler (default: True)",
+            )
     parser.add_argument(
-        "--compare-methods",
-        action="store_true",
-        help="Generate graphs using both methods and compare them",
-    )
+            "--allow-multiproc",
+            action="store_true",
+            help="Allow parallel processing for Boltzmann sampler",
+            )
 
     args = parser.parse_args()
 
@@ -422,8 +432,8 @@ def main() -> None:
     # Check if Boltzmann is available
     if args.method == "boltzmann" and not BOLTZMANN_AVAILABLE:
         print(
-            "Warning: Boltzmann sampler not available. Falling back to Delaunay method."
-        )
+                "Warning: Boltzmann sampler not available. Falling back to Delaunay method."
+                )
         print(f"Import error: {BOLTZMANN_IMPORT_ERROR}")
         args.method = "delaunay"
 
@@ -438,94 +448,83 @@ def main() -> None:
             print(f"  Warning: Boltzmann not available, using Delaunay instead")
 
     for graph_id in range(args.num_graphs):
-        method_to_use = args.method
 
-        if args.compare_methods:
-            # Generate both methods
-            methods_to_test = ["delaunay"]
-            if BOLTZMANN_AVAILABLE:
-                methods_to_test.append("boltzmann")
-        else:
-            methods_to_test = [method_to_use]
-
-        for method in methods_to_test:
-            print(
+        # Method of graph generation (currently delaunay triangulation of random point-set or Boltzmann uniform sampling)
+        method = args.method
+        print(
                 f"\nGenerating graph {graph_id + 1}/{args.num_graphs} (method: {method})"
-            )
-            print(
+                )
+        print(
                 f"Vertices: {args.n_vertices}, Seed: {args.seed + graph_id}, Weighted: {args.weighted}"
-            )
+                )
 
-            # Generate planar graph
-            try:
-                G = generate_planar_graph(
+        # Generate planar graph
+        print(args.max_degree)
+        try:
+            G = generate_planar_graph(
                     args.n_vertices,
                     args.seed + graph_id,
                     args.weighted,
+                    args.max_degree,
                     method=method,
                     epsilon=args.epsilon,
                     require_connected=args.require_connected,
                     allow_multiproc=args.allow_multiproc,
-                )
-            except Exception as e:
-                print(f"Error generating graph with {method}: {e}")
-                continue
+                    )
+            # Convert to adjacency matrix
+            adj_matrix = adjacency_matrix_to_numpy(G)
 
-        # Convert to adjacency matrix
-        adj_matrix = adjacency_matrix_to_numpy(G)
+            # Compute effective resistance
+            resistance_matrix = compute_effective_resistance(G)
+            resistance_multiset = get_resistance_multiset(resistance_matrix)
 
-        # Compute effective resistance
-        resistance_matrix = compute_effective_resistance(G)
-        resistance_multiset = get_resistance_multiset(resistance_matrix)
+            # Create metadata dictionary
+            graph_metadata = {
+                    "n_nodes": G.number_of_nodes(),
+                    "m_edges": G.number_of_edges(),
+                    "weighted": args.weighted,
+                    "graph_id": graph_id,
+                    "seed": args.seed + graph_id,
+                    "is_connected": nx.is_connected(G),
+                    "is_planar": nx.check_planarity(G)[0],
+                    "node_degrees": [d for n, d in G.degree()],
+                    "edge_weights": [
+                        G[edge[0]][edge[1]].get("weight", 1.0) for edge in G.edges()
+                        ]
+                    if args.weighted
+                    else None,
+                    "generation_method": method,
+                    "boltzmann_epsilon": args.epsilon if method == "boltzmann" else None,
+                    "boltzmann_connected": args.require_connected
+                    if method == "boltzmann"
+                    else None,
+                    }
 
-        # Create metadata dictionary
-        graph_metadata = {
-            "n_nodes": G.number_of_nodes(),
-            "m_edges": G.number_of_edges(),
-            "weighted": args.weighted,
-            "graph_id": graph_id,
-            "seed": args.seed + graph_id,
-            "is_connected": nx.is_connected(G),
-            "is_planar": nx.check_planarity(G)[0],
-            "node_degrees": [d for n, d in G.degree()],
-            "edge_weights": [
-                G[edge[0]][edge[1]].get("weight", 1.0) for edge in G.edges()
-            ]
-            if args.weighted
-            else None,
-            "generation_method": method,
-            "boltzmann_epsilon": args.epsilon if method == "boltzmann" else None,
-            "boltzmann_connected": args.require_connected
-            if method == "boltzmann"
-            else None,
-        }
+            # Modify graph_id if comparing methods
+            current_graph_id = graph_id
 
-        # Modify graph_id if comparing methods
-        current_graph_id = graph_id
-        if args.compare_methods:
-            if method == "delaunay":
-                current_graph_id = graph_id * 2
-            else:
-                current_graph_id = graph_id * 2 + 1
+            # Save results
+            save_results(
+                    adj_matrix,
+                    resistance_matrix,
+                    resistance_multiset,
+                    graph_metadata,
+                    output_dir,
+                    current_graph_id,
+                    )
 
-        # Save results
-        save_results(
-            adj_matrix,
-            resistance_matrix,
-            resistance_multiset,
-            graph_metadata,
-            output_dir,
-            current_graph_id,
-        )
+            # Print summary statistics
+            print(f"  Graph edges: {G.number_of_edges()}")
+            print(f"  Resistance distances: {len(resistance_multiset)} pairs")
+            print(f"  Mean resistance: {np.mean(resistance_multiset):.4f}")
+            print(f"  Std resistance: {np.std(resistance_multiset):.4f}")
+            if args.weighted:
+                weights = [G[edge[0]][edge[1]]["weight"] for edge in G.edges()]
+                print(f"  Weight range: [{min(weights):.3f}, {max(weights):.3f}]")
 
-        # Print summary statistics
-        print(f"  Graph edges: {G.number_of_edges()}")
-        print(f"  Resistance distances: {len(resistance_multiset)} pairs")
-        print(f"  Mean resistance: {np.mean(resistance_multiset):.4f}")
-        print(f"  Std resistance: {np.std(resistance_multiset):.4f}")
-        if args.weighted:
-            weights = [G[edge[0]][edge[1]]["weight"] for edge in G.edges()]
-            print(f"  Weight range: [{min(weights):.3f}, {max(weights):.3f}]")
+        except Exception as e:
+            print(f"Error generating graph with {method}: {e}")
+            continue
 
 
 if __name__ == "__main__":
