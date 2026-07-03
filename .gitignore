@@ -2,3 +2,4 @@ venv                     # Virtual environment
 .DS_Store                # macOS system files
 graphs
 visualization
+__pycache__
